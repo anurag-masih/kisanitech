@@ -3,42 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kisani MVP - Precision Weed Control</title>
+    <title>Kisani Technologies | AI-Powered Precision Weed Management</title>
     <link rel="stylesheet" href="style.css">
-    <!-- OpenCV.js for fallback/image processing -->
+    <!-- OpenCV.js for browser-based computer vision -->
     <script async src="https://docs.opencv.org/4.8.0/opencv.js"></script>
-    <!-- ONNX Runtime Web for running YOLO models in the browser -->
+    <!-- ONNX Runtime Web for future YOLO model upgrades -->
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Kisani Autonomous Weed Management</h1>
-        
-        <div class="card">
-            <h2>1. Hardware Connection</h2>
-            <button id="connectSerialBtn">Connect to GRBL Machine</button>
-            <span id="connectionStatus" class="status-disconnected">Disconnected</span>
+    <!-- HERO SECTION -->
+    <header class="hero">
+        <div class="container">
+            <h1>Kisani Technologies</h1>
+            <p class="tagline">AI-driven agricultural robotics enabling chemical-free, precision weed control for modern farmers.</p>
+            <a href="#demo" class="cta-button">Test the AI Live</a>
         </div>
+    </header>
 
-        <div class="card">
-            <h2>2. Plot Capture & AI Analysis</h2>
-            <input type="file" id="imageLoader" accept="image/*">
-            <br>
-            <canvas id="imageCanvas"></canvas>
-            <br>
-            <button id="processBtn" disabled>Run AI Weed Detection & Generate G-Code</button>
-        </div>
+    <main class="container">
 
-        <div class="card">
-            <h2>3. G-Code Output & Execution</h2>
-            <textarea id="gcodeOutput" placeholder="G-code commands will appear here..."></textarea>
-            <br>
-            <button id="sendGcodeBtn" disabled>Stream G-Code to Machine</button>
-        </div>
-    </div>
+        <!-- ABOUT / FEATURES SECTION -->
+        <section class="card">
+            <h2>About the Project</h2>
+            <p>Kisani is developing an AI-powered precision weed management platform that uses computer vision and robotics to reduce herbicide use, lower labor costs, and improve agricultural sustainability. This open-source MVP acts as our autonomous pipeline: <strong>SEE → THINK → MOVE → TARGET</strong>.</p>
+            
+            <div class="features-grid">
+                <div class="feature-box">
+                    <h3>👁️ Vision & AI</h3>
+                    <p>Processes overhead plot imagery via browser-based computer vision to accurately identify target weeds.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>📐 Coordinate Mapping</h3>
+                    <p>Instantly translates camera pixel coordinates into real-world millimeter coordinates ($X, Y$) for gantry positioning.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>⚙️ Direct G-Code Execution</h3>
+                    <p>Dynamically compiles movement commands and laser/tool parameters, streaming directly to GRBL-based hardware via USB.</p>
+                </div>
+            </div>
+        </section>
 
-    <!-- Link separate modular JavaScript files -->
+        <!-- LIVE TESTING DEMO SECTION -->
+        <section id="demo" class="card">
+            <h2>Live Accuracy Testbed</h2>
+            <p>Test our vision pipeline right now! Upload any picture of a farm plot or test bed below to see how the system detects weeds, maps targets, and generates machine instructions.</p>
+            
+            <div class="demo-workspace">
+                <div class="upload-area">
+                    <h3>1. Upload Plot Image</h3>
+                    <input type="file" id="imageLoader" accept="image/*">
+                    <canvas id="imageCanvas"></canvas>
+                </div>
+                
+                <div class="action-area">
+                    <h3>2. AI Analysis & G-Code Output</h3>
+                    <button id="processBtn" disabled>Run AI Weed Detection</button>
+                    
+                    <h3 style="margin-top: 20px;">Generated GRBL Code:</h3>
+                    <textarea id="gcodeOutput" placeholder="G-code instructions will appear here after processing..."></textarea>
+                    
+                    <h3 style="margin-top: 20px;">Hardware Control</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button id="connectSerialBtn" style="background: #17a2b8;">Connect Machine</button>
+                        <span id="connectionStatus" class="status-disconnected">Disconnected</span>
+                    </div>
+                    <button id="sendGcodeBtn" style="background: #ffc107; color: #000; margin-top: 10px;" disabled>Stream G-Code to Machine</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section class="card contact-section">
+            <h2>Get in Touch</h2>
+            <p>Interested in partnering, investing, or learning more about Kisani Technologies? Reach out to our team.</p>
+            <ul class="contact-details">
+                <li><strong>Email:</strong> contact@kisanitech.com</li>
+                <li><strong>GitHub Repository:</strong> <a href="https://github.com/Anurag-Masih/kisani-mvp" target="_blank">View Source Code</a></li>
+                <li><strong>Location:</strong> India</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Kisani Technologies Private Limited. All rights reserved.</p>
+    </footer>
+
+    <!-- Modular Script Links -->
     <script src="vision.js"></script>
     <script src="serial.js"></script>
     <script src="app.js"></script>
