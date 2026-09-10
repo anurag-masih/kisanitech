@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kisani MVP - Precision Weed Control</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- OpenCV.js for fallback/image processing -->
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js"></script>
+    <!-- ONNX Runtime Web for running YOLO models in the browser -->
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Kisani Autonomous Weed Management</h1>
+        
+        <div class="card">
+            <h2>1. Hardware Connection</h2>
+            <button id="connectSerialBtn">Connect to GRBL Machine</button>
+            <span id="connectionStatus" class="status-disconnected">Disconnected</span>
+        </div>
+
+        <div class="card">
+            <h2>2. Plot Capture & AI Analysis</h2>
+            <input type="file" id="imageLoader" accept="image/*">
+            <br>
+            <canvas id="imageCanvas"></canvas>
+            <br>
+            <button id="processBtn" disabled>Run AI Weed Detection & Generate G-Code</button>
+        </div>
+
+        <div class="card">
+            <h2>3. G-Code Output & Execution</h2>
+            <textarea id="gcodeOutput" placeholder="G-code commands will appear here..."></textarea>
+            <br>
+            <button id="sendGcodeBtn" disabled>Stream G-Code to Machine</button>
+        </div>
+    </div>
+
+    <!-- Link separate modular JavaScript files -->
+    <script src="vision.js"></script>
+    <script src="serial.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
