@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kisani Technologies | AI & Laser Precision Agriculture</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        agri: {
+                            950: '#030906',
+                            900: '#06140d',
+                            800: '#0c2619',
+                            700: '#133a26',
+                            600: '#1c5437',
+                            500: '#277c50',
+                            400: '#34a86b',
+                            300: '#52cd8b',
+                            200: '#86e4b1',
+                            100: '#c5f4da',
+                        },
+                        cyanGlow: '#00f2fe'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter & Fira Code -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030906;
+            color: #f0fdf4;
+            overflow-x: hidden;
+        }
+        .glow-emerald {
+            box-shadow: 0 0 40px -10px rgba(52, 168, 107, 0.3);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 40px -10px rgba(0, 242, 254, 0.2);
+        }
+        .glass-card {
+            background: rgba(12, 38, 25, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(52, 168, 107, 0.18);
+        }
+        .glass-card:hover {
+            border-color: rgba(52, 168, 107, 0.5);
+            box-shadow: 0 0 30px -5px rgba(52, 168, 107, 0.2);
+        }
+        /* Custom canvas background for particle grid */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .content-layer {
+            position: relative;
+            z-index: 2;
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-agri-950 text-agri-100 selection:bg-agri-500 selection:text-white">
+
+    <!-- Interactive Particle Background Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-40 bg-agri-950/80 backdrop-blur-md border-b border-agri-800/60 transition-all duration-300 content-layer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#home" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-agri-400 to-agri-600 flex items-center justify-center glow-emerald group-hover:scale-105 transition-transform">
+                    <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-bold tracking-tight text-white font-sans flex items-center gap-1.5">
+                        KISANI <span class="text-agri-400">TECH</span>
+                    </span>
+                    <span class="text-[10px] text-agri-300 tracking-widest uppercase font-mono">Autonomous Agriculture</span>
+                </div>
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex items-center gap-8 font-medium text-sm text-agri-200">
+                <a href="#home" class="hover:text-agri-400 transition-colors">Home</a>
+                <a href="#technology" class="hover:text-agri-400 transition-colors">Technology</a>
+                <a href="#solutions" class="hover:text-agri-400 transition-colors">Solutions</a>
+                <a href="#impact" class="hover:text-agri-400 transition-colors">Impact</a>
+                <a href="#about" class="hover:text-agri-400 transition-colors">Leadership</a>
+                <a href="#contact" class="hover:text-agri-400 transition-colors">Connect</a>
+            </div>
+
+            <!-- Action Button -->
+            <div class="hidden md:flex items-center gap-4">
+                <a href="#contact" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-agri-500 to-agri-600 hover:from-agri-400 hover:to-agri-500 text-white font-semibold text-sm shadow-lg glow-emerald transition-all transform hover:-translate-y-0.5">
+                    Investor & Demo Portal
+                </a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-agri-200 hover:text-white p-2">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-agri-900 border-b border-agri-800 px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+            <a href="#home" class="mobile-link text-agri-200 hover:text-agri-400">Home</a>
+            <a href="#technology" class="mobile-link text-agri-200 hover:text-agri-400">Technology</a>
+            <a href="#solutions" class="mobile-link text-agri-200 hover:text-agri-400">Solutions</a>
+            <a href="#impact" class="mobile-link text-agri-200 hover:text-agri-400">Impact</a>
+            <a href="#about" class="mobile-link text-agri-200 hover:text-agri-400">Leadership</a>
+            <a href="#contact" class="mobile-link text-agri-200 hover:text-agri-400">Connect</a>
+            <a href="#contact" class="mobile-link mt-2 text-center w-full py-2.5 rounded-xl bg-agri-500 text-white font-semibold">Investor & Demo Portal</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden content-layer">
+        <!-- Glow Backdrop Gradients -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-agri-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/3 right-10 w-[300px] h-[300px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-4xl mx-auto">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 border border-agri-400/30 text-xs font-mono text-agri-300 animate-float">
+                    <span class="w-2 h-2 rounded-full bg-agri-400 animate-pulse"></span>
+                    INDIA'S SECOND LASER WEEDING COMPANY
+                </div>
+
+                <!-- Main Heading -->
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]">
+                    Autonomous AI & <span class="bg-gradient-to-r from-agri-300 via-agri-400 to-cyanGlow bg-clip-text text-transparent">Laser Precision Weeding</span>
+                </h1>
+
+                <!-- Subtitle -->
+                <p class="text-lg sm:text-xl text-agri-200/80 mb-10 max-w-2xl mx-auto leading-relaxed">
+                    Pioneering high-precision agricultural robotics, real-time computer vision target positioning, and zero-chemical smart thermal laser crop protection systems designed to maximize global farm yields sustainably.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#contact" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-agri-500 to-agri-600 hover:from-agri-400 hover:to-agri-500 text-white font-bold text-base shadow-xl glow-emerald flex items-center justify-center gap-3 transition-all transform hover:-translate-y-0.5">
+                        <i data-lucide="trending-up" class="w-5 h-5"></i> Investor Relations & Funding
+                    </a>
+                    <a href="#technology" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-card hover:bg-agri-800/60 text-white font-semibold text-base flex items-center justify-center gap-3 transition-all border border-agri-500/30">
+                        <i data-lucide="cpu" class="w-5 h-5 text-agri-400"></i> Explore Tech Stack
+                    </a>
+                </div>
+            </div>
+
+            <!-- Interactive System Status Bar -->
+            <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 rounded-2xl flex items-center gap-4 shadow-lg hover:scale-[1.02] transition-transform">
+                    <div class="w-12 h-12 rounded-xl bg-agri-800/80 flex items-center justify-center text-agri-400 border border-agri-700">
+                        <i data-lucide="crosshair" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold font-mono text-white">±1.2 mm</div>
+                        <div class="text-sm text-agri-300">Laser Targeting Precision</div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl flex items-center gap-4 shadow-lg hover:scale-[1.02] transition-transform">
+                    <div class="w-12 h-12 rounded-xl bg-agri-800/80 flex items-center justify-center text-cyanGlow border border-agri-700">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold font-mono text-white">Real-Time</div>
+                        <div class="text-sm text-agri-300">Edge Vision Processing</div>
+                    </div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl flex items-center gap-4 shadow-lg hover:scale-[1.02] transition-transform">
+                    <div class="w-12 h-12 rounded-xl bg-agri-800/80 flex items-center justify-center text-agri-400 border border-agri-700">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold font-mono text-white">92%</div>
+                        <div class="text-sm text-agri-300">Chemical Reduction Index</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Technology & R&D Showcase -->
+    <section id="technology" class="py-24 relative bg-agri-900/40 border-t border-b border-agri-800/60 content-layer backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs uppercase font-mono tracking-widest text-agri-400 mb-3">Under The Hood</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mb-4">Core Technology & R&D Stack</h3>
+                <p class="text-agri-200/80 text-base">Engineered from the ground up for high-throughput, unstructured agricultural environments.</p>
+            </div>
+
+            <!-- Tech Interactive Tabs -->
+            <div class="flex flex-wrap justify-center gap-3 mb-12">
+                <button onclick="switchTab('cv')" id="btn-cv" class="tech-tab px-6 py-3 rounded-xl font-semibold text-sm transition-all bg-agri-500 text-white shadow-md glow-emerald flex items-center gap-2">
+                    <i data-lucide="eye" class="w-4 h-4"></i> Computer Vision & AI
+                </button>
+                <button onclick="switchTab('robotics')" id="btn-robotics" class="tech-tab px-6 py-3 rounded-xl font-semibold text-sm transition-all glass-card text-agri-300 hover:text-white flex items-center gap-2">
+                    <i data-lucide="bot" class="w-4 h-4"></i> Laser Weeding & Robotics
+                </button>
+                <button onclick="switchTab('edge')" id="btn-edge" class="tech-tab px-6 py-3 rounded-xl font-semibold text-sm transition-all glass-card text-agri-300 hover:text-white flex items-center gap-2">
+                    <i data-lucide="cpu" class="w-4 h-4"></i> Edge Computing Stack
+                </button>
+            </div>
+
+            <!-- Tab Content Containers -->
+            <div class="max-w-5xl mx-auto">
+                <!-- CV Content -->
+                <div id="content-cv" class="tech-content glass-card rounded-3xl p-8 sm:p-12 border border-agri-500/30">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <span class="text-xs font-mono text-agri-400 bg-agri-800/80 px-3 py-1 rounded-md">PYTHON & OPENCV PIPELINE</span>
+                            <h4 class="text-2xl font-bold text-white mt-4 mb-4">Real-Time Target Positioning & Contour Detection</h4>
+                            <p class="text-agri-200/80 mb-6 leading-relaxed">
+                                Our advanced computer vision algorithms process high-resolution crop feeds instantly. Utilizing specialized HSV color thresholding, contour extraction, and spatial mapping, our systems isolate weed coordinates to guide high-speed laser actuators with sub-millimeter precision in variable outdoor lighting.
+                            </p>
+                            <ul class="space-y-3 text-sm text-agri-200">
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> Dynamic lighting compensation models</li>
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> Instant crop vs. weed morphological classification</li>
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> 60+ FPS inference on edge hardware</li>
+                            </ul>
+                        </div>
+                        <div class="bg-agri-950 p-6 rounded-2xl border border-agri-800 font-mono text-xs text-agri-300 shadow-inner overflow-x-auto">
+                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-agri-800 text-[10px] text-agri-400">
+                                <span>laser_weed_pipeline.py</span>
+                                <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-agri-400 animate-pulse"></span> ACTIVE</span>
+                            </div>
+                            <pre class="text-agri-200 leading-relaxed"><code>import cv2
+import numpy as np
+
+def compute_laser_targets(frame):
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    lower_weed = np.array([35, 40, 40])
+    upper_weed = np.array([85, 255, 255])
+    
+    mask = cv2.inRange(hsv, lower_weed, upper_weed)
+    contours, _ = cv2.findContours(mask, 
+                    cv2.RETR_EXTERNAL, 
+                    cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Return Cartesian (X, Y) coordinates for laser actuation
+    return [cv2.moments(c) for c in contours]</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Robotics Content -->
+                <div id="content-robotics" class="tech-content hidden glass-card rounded-3xl p-8 sm:p-12 border border-agri-500/30">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <span class="text-xs font-mono text-agri-400 bg-agri-800/80 px-3 py-1 rounded-md">HARDWARE & LASER ACTUATION</span>
+                            <h4 class="text-2xl font-bold text-white mt-4 mb-4">Precise & Thermal Laser Weeding Modules</h4>
+                            <p class="text-agri-200/80 mb-6 leading-relaxed">
+                                Built for rugged agricultural environments. Our multi-axis frame and integrated thermal laser systems translate computer vision coordinates into instantaneous physical action, destroying weed meristems with targeted light energy without disturbing topsoil or beneficial crop roots.
+                            </p>
+                            <ul class="space-y-3 text-sm text-agri-200">
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> High-speed galvanometer and frame synchronization</li>
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> Weather-sealed industrial enclosures (IP65+)</li>
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> Zero soil disruption & micro-thermal weed eradication</li>
+                            </ul>
+                        </div>
+                        <div class="bg-agri-950 p-6 rounded-2xl border border-agri-800 font-mono text-xs text-agri-300">
+                            <div class="text-agri-400 mb-2 font-bold">// GRBL G-CODE ACTUATION STREAM</div>
+                            <div class="space-y-2 text-agv-200">
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>G21 / G90:</span> <span class="text-agri-400">Metric & Absolute Positioning</span></div>
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>G1 X120.4 Y85.2:</span> <span class="text-agri-400">Rapid Gantry Slewing</span></div>
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>M3 S255:</span> <span class="text-cyanGlow font-bold">Laser Pulse Triggered</span></div>
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>M5:</span> <span class="text-agri-400">Laser Deactivation</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edge Computing Content -->
+                <div id="content-edge" class="tech-content hidden glass-card rounded-3xl p-8 sm:p-12 border border-agri-500/30">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <span class="text-xs font-mono text-agri-400 bg-agri-800/80 px-3 py-1 rounded-md">DECENTRALIZED COMPUTE</span>
+                            <h4 class="text-2xl font-bold text-white mt-4 mb-4">Autonomous On-Farm Processing Without Cloud Dependency</h4>
+                            <p class="text-agri-200/80 mb-6 leading-relaxed">
+                                Farmland often lacks reliable internet connectivity. Our systems rely on high-performance edge processing nodes capable of running deep neural networks locally in the field, ensuring continuous operation anywhere on the globe.
+                            </p>
+                            <ul class="space-y-3 text-sm text-agri-200">
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> Zero internet dependency for real-time operation</li>
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> Encrypted telemetry and localized map syncing</li>
+                                <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-agri-400"></i> Over-the-air (OTA) AI model updates</li>
+                            </ul>
+                        </div>
+                        <div class="bg-agri-950 p-6 rounded-2xl border border-agri-800 font-mono text-xs text-agri-300">
+                            <div class="text-agri-400 mb-2 font-bold">// EDGE NODE DIAGNOSTICS</div>
+                            <div class="space-y-2 text-agv-200">
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>CPU Load:</span> <span class="text-agri-400 font-bold">28%</span></div>
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>GPU Temp:</span> <span class="text-agri-400 font-bold">42.4°C</span></div>
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>Memory Usage:</span> <span class="text-agri-400 font-bold">1.8GB / 8GB</span></div>
+                                <div class="flex justify-between border-b border-agri-900 pb-1"><span>Model Version:</span> <span class="text-cyanGlow font-bold">v3.4.1-stable</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product & Solutions Grid -->
+    <section id="solutions" class="py-24 relative content-layer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs uppercase font-mono tracking-widest text-agri-400 mb-3">Enterprise Offerings</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mb-4">Precision Solutions Portfolio</h3>
+                <p class="text-agri-200/80 text-base">Modular agricultural automation systems designed for scalable commercial deployments.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Solution 1 -->
+                <div class="glass-card rounded-3xl p-8 flex flex-col justify-between border border-agri-500/20 hover:border-agri-400/50 transition-all group hover:-translate-y-1">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-agri-500 to-agri-700 flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-lg glow-emerald">
+                            <i data-lucide="crosshair" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-3">Autonomous Laser Weeding</h4>
+                        <p class="text-agri-200/80 text-sm leading-relaxed mb-6">
+                            High-precision thermal laser systems that target and destroy invasive weed meristems instantly upon computer vision identification, eliminating chemical dependency.
+                        </p>
+                    </div>
+                    <ul class="space-y-2 text-xs text-agri-300 border-t border-agri-800 pt-4">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-agri-400"></i> Up to 90% chemical herbicide savings</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-agri-400"></i> Zero soil contamination or drift</li>
+                    </ul>
+                </div>
+
+                <!-- Solution 2 -->
+                <div class="glass-card rounded-3xl p-8 flex flex-col justify-between border border-agri-500/20 hover:border-agri-400/50 transition-all group hover:-translate-y-1">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-agri-600 to-cyan-700 flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-lg glow-cyan">
+                            <i data-lucide="cpu" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-3">Smart Farm Automation Modules</h4>
+                        <p class="text-agri-200/80 text-sm leading-relaxed mb-6">
+                            Plug-and-play sensor kits and autonomous gantry controllers that upgrade existing farm equipment into intelligent, data-driven laser units.
+                        </p>
+                    </div>
+                    <ul class="space-y-2 text-xs text-agri-300 border-t border-agri-800 pt-4">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-agri-400"></i> Universal retrofit compatibility</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-agri-400"></i> Real-time telemetry dashboard</li>
+                    </ul>
+                </div>
+
+                <!-- Solution 3 -->
+                <div class="glass-card rounded-3xl p-8 flex flex-col justify-between border border-agri-500/20 hover:border-agri-400/50 transition-all group hover:-translate-y-1">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-agri-500 to-agri-600 flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-lg glow-emerald">
+                            <i data-lucide="settings" class="w-7 h-7"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-3">Custom Engineering & Deployment</h4>
+                        <p class="text-agri-200/80 text-sm leading-relaxed mb-6">
+                            Tailored computer vision and laser gantry engineering partnerships with large agribusiness conglomerates and agricultural research institutions.
+                        </p>
+                    </div>
+                    <ul class="space-y-2 text-xs text-agri-300 border-t border-agri-800 pt-4">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-agri-400"></i> Custom CV model training</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-agri-400"></i> On-site pilot deployment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact & Metrics Dashboard -->
+    <section id="impact" class="py-24 bg-agri-900/40 border-t border-b border-agri-800/60 relative content-layer backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs uppercase font-mono tracking-widest text-agri-400 mb-3">Measurable Results</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mb-4">Driving Sustainable Agribusiness</h3>
+                <p class="text-agri-200/80 text-base">Real-world metrics tracked across active commercial deployments and field trials.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Metric 1 -->
+                <div class="glass-card p-8 rounded-3xl text-center border border-agri-500/20 hover:scale-[1.02] transition-transform">
+                    <div class="text-4xl lg:text-5xl font-extrabold text-white font-mono mb-2 bg-gradient-to-r from-agri-300 to-agri-400 bg-clip-text text-transparent">90%</div>
+                    <div class="text-sm font-semibold text-white mb-1">Chemical Reduction</div>
+                    <p class="text-xs text-agri-300">Eliminating broad-spectrum herbicide waste via laser weeding.</p>
+                </div>
+
+                <!-- Metric 2 -->
+                <div class="glass-card p-8 rounded-3xl text-center border border-agri-500/20 hover:scale-[1.02] transition-transform">
+                    <div class="text-4xl lg:text-5xl font-extrabold text-white font-mono mb-2 bg-gradient-to-r from-agri-300 to-cyanGlow bg-clip-text text-transparent">±1mm</div>
+                    <div class="text-sm font-semibold text-white mb-1">Laser Accuracy</div>
+                    <p class="text-xs text-agri-300">Pinpoint thermal energy beam precision.</p>
+                </div>
+
+                <!-- Metric 3 -->
+                <div class="glass-card p-8 rounded-3xl text-center border border-agri-500/20 hover:scale-[1.02] transition-transform">
+                    <div class="text-4xl lg:text-5xl font-extrabold text-white font-mono mb-2 bg-gradient-to-r from-agri-300 to-agri-400 bg-clip-text text-transparent">4x</div>
+                    <div class="text-sm font-semibold text-white mb-1">Operational Speed</div>
+                    <p class="text-xs text-agri-300">Faster throughput compared to manual labor squads.</p>
+                </div>
+
+                <!-- Metric 4 -->
+                <div class="glass-card p-8 rounded-3xl text-center border border-agri-500/20 hover:scale-[1.02] transition-transform">
+                    <div class="text-4xl lg:text-5xl font-extrabold text-white font-mono mb-2 bg-gradient-to-r from-agri-300 to-cyanGlow bg-clip-text text-transparent">100%</div>
+                    <div class="text-sm font-semibold text-white mb-1">Edge Independence</div>
+                    <p class="text-xs text-agri-300">Fully autonomous operation without cloud latency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leadership & Team Section -->
+    <section id="about" class="py-24 relative content-layer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs uppercase font-mono tracking-widest text-agri-400 mb-3">Visionary Leadership</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mb-4">Built by Experts in AI & Agriculture</h3>
+                <p class="text-agri-200/80 text-base">Bridging deep technical prowess in computer vision with hands-on agribusiness innovation.</p>
+            </div>
+
+            <div class="max-w-4xl mx-auto glass-card rounded-3xl p-8 sm:p-12 border border-agri-500/30 flex flex-col md:flex-row items-center gap-8">
+                <!-- Avatar / Placeholder -->
+                <div class="w-36 h-36 rounded-2xl bg-gradient-to-br from-agri-400 to-agri-600 flex items-center justify-center text-white shrink-0 shadow-xl glow-emerald">
+                    <i data-lucide="user" class="w-16 h-16"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <h4 class="text-2xl font-bold text-white">COMPETENT TEAM</h4>
+                        <span class="text-xs font-mono text-agri-400 bg-agri-800/80 px-3 py-1 rounded-md border border-agri-700">KISANI TECHNOLOGIES</span>
+                    </div>
+                    <p class="text-agri-200/80 text-sm leading-relaxed mb-6">
+                        Kisani Tech Team is leading the engineering and computer vision research team at Kisani Technologies. Specializing in embedded systems, real-time target positioning, Cartesian gantries, and automated laser weeding systems. Passionate about scaling practical AI solutions that transform farm productivity and foster sustainable agricultural ecosystems.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-3 py-1 rounded-lg bg-agri-900 border border-agri-800 text-xs font-mono text-agri-300 flex items-center gap-1.5"><i data-lucide="cpu" class="w-3.5 h-3.5 text-agri-400"></i> Computer Vision</span>
+                        <span class="px-3 py-1 rounded-lg bg-agri-900 border border-agri-800 text-xs font-mono text-agri-300 flex items-center gap-1.5"><i data-lucide="zap" class="w-3.5 h-3.5 text-agri-400"></i> Laser Actuation</span>
+                        <span class="px-3 py-1 rounded-lg bg-agri-900 border border-agri-800 text-xs font-mono text-agri-300 flex items-center gap-1.5"><i data-lucide="code" class="w-3.5 h-3.5 text-agri-400"></i> Python / G-Code</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Investor Relations & Client Demo Section -->
+    <section id="contact" class="py-24 bg-agri-900/40 border-t border-agri-800/60 relative content-layer backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h2 class="text-xs uppercase font-mono tracking-widest text-agri-400 mb-3">Priority Portal</h2>
+                <h3 class="text-3xl sm:text-4xl font-bold text-white mb-4">Connect with Kisani Technologies</h3>
+                <p class="text-agri-200/80 text-base">Whether you are scaling your agribusiness or looking to participate in our funding round, our leadership team is ready to connect.</p>
+            </div>
+
+            <!-- Inquiry Type Selector Tabs -->
+            <div class="flex justify-center mb-10">
+                <div class="glass-card p-1.5 rounded-2xl flex gap-2 border border-agri-500/30">
+                    <button onclick="switchInquiryType('client')" id="tab-client" class="inquiry-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all bg-agri-500 text-white shadow-md glow-emerald flex items-center gap-2">
+                        <i data-lucide="tractor" class="w-4 h-4"></i> Agribusiness & Clients
+                    </button>
+                    <button onclick="switchInquiryType('investor')" id="tab-investor" class="inquiry-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-agri-300 hover:text-white flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i> Potential Investors
+                    </button>
+                </div>
+            </div>
+
+            <div class="max-w-2xl mx-auto glass-card rounded-3xl p-8 sm:p-12 border border-agri-500/30">
+                <form id="inquiry-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                    <!-- Dynamic Form Header Indicator -->
+                    <div id="form-header-badge" class="p-4 rounded-xl bg-agri-800/60 border border-agri-700/60 text-xs font-mono text-agri-300 flex items-center gap-3">
+                        <i data-lucide="calendar" class="w-5 h-5 text-agri-400"></i>
+                        <span>Booking Request: <strong class="text-white">Commercial Demo & Laser Field Trial Evaluation</strong></span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-mono uppercase text-agri-300 mb-2">Full Name</label>
+                            <input type="text" id="name" required class="w-full bg-agri-950 border border-agri-800 rounded-xl px-4 py-3 text-white placeholder-agri-600 focus:outline-none focus:border-agri-400 transition-colors text-sm" placeholder="Dr. Rajesh Kumar">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono uppercase text-agri-300 mb-2">Work Email</label>
+                            <input type="email" id="email" required class="w-full bg-agri-950 border border-agri-800 rounded-xl px-4 py-3 text-white placeholder-agri-600 focus:outline-none focus:border-agri-400 transition-colors text-sm" placeholder="rajesh@agrifarm.com">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label id="org-label" class="block text-xs font-mono uppercase text-agri-300 mb-2">Organization / Farm Name</label>
+                            <input type="text" id="org" required class="w-full bg-agri-950 border border-agri-800 rounded-xl px-4 py-3 text-white placeholder-agri-600 focus:outline-none focus:border-agri-400 transition-colors text-sm" placeholder="GreenFields Agribusiness">
+                        </div>
+                        <div id="selector-field-container">
+                            <label id="selector-label" class="block text-xs font-mono uppercase text-agri-300 mb-2">Approximate Acreage</label>
+                            <select id="selector-dropdown" class="w-full bg-agri-950 border border-agri-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-agri-400 transition-colors text-sm">
+                                <option value="small">50 - 500 Acres</option>
+                                <option value="medium">500 - 2,500 Acres</option>
+                                <option value="large">2,500+ Acres</option>
+                                <option value="partner">Research / Strategic Partner</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-mono uppercase text-agri-300 mb-2">Message or Discussion Agenda</label>
+                        <textarea id="message" rows="4" class="w-full bg-agri-950 border border-agri-800 rounded-xl px-4 py-3 text-white placeholder-agri-600 focus:outline-none focus:border-agri-400 transition-colors text-sm" placeholder="Tell us about your laser weeding requirements or investment thesis..."></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-agri-500 to-agri-600 hover:from-agri-400 hover:to-agri-500 text-white font-bold text-base shadow-lg glow-emerald transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                        <span>Submit Demo & Meeting Request</span> <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-agri-950 border-t border-agri-800/80 py-12 content-layer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-agri-600 flex items-center justify-center text-white">
+                    <i data-lucide="cpu" class="w-4 h-4"></i>
+                </div>
+                <span class="text-base font-bold text-white tracking-tight">KISANI TECHNOLOGIES</span>
+            </div>
+            <div class="text-xs text-agri-300 font-mono text-center md:text-left">
+                &copy; 2026 Kisani Technologies Private Limited. All rights reserved. Registered in Kanpur, Uttar Pradesh, India.
+            </div>
+            <div class="flex items-center gap-6 text-xs text-agri-300">
+                <a href="#home" class="hover:text-white transition-colors">Privacy</a>
+                <a href="#home" class="hover:text-white transition-colors">Terms</a>
+                <a href="#home" class="hover:text-white transition-colors">Security</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Interactions & Particle Engine -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Canvas Particle Network Background Animation
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.6;
+                this.vy = (Math.random() - 0.5) * 0.6;
+                this.radius = Math.random() * 1.5 + 1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(52, 168, 107, 0.45)';
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor((width * height) / 18000);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        initParticles();
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw connecting lines
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(52, 168, 107, ${0.15 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Technology Section Tabs
+        function switchTab(tabId) {
+            document.querySelectorAll('.tech-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tech-tab').forEach(el => {
+                el.classList.remove('bg-agri-500', 'text-white', 'shadow-md', 'glow-emerald');
+                el.classList.add('glass-card', 'text-agri-300');
+            });
+
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('glass-card', 'text-agri-300');
+            activeBtn.classList.add('bg-agri-500', 'text-white', 'shadow-md', 'glow-emerald');
+            lucide.createIcons();
+        }
+
+        // Inquiry Type Switching (Client vs Investor)
+        let currentInquiryMode = 'client';
+
+        function switchInquiryType(mode) {
+            currentInquiryMode = mode;
+            const clientBtn = document.getElementById('tab-client');
+            const investorBtn = document.getElementById('tab-investor');
+            const badge = document.getElementById('form-header-badge');
+            const orgLabel = document.getElementById('org-label');
+            const selectorLabel = document.getElementById('selector-label');
+            const selectorDropdown = document.getElementById('selector-dropdown');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (mode === 'client') {
+                clientBtn.className = "inquiry-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all bg-agri-500 text-white shadow-md glow-emerald flex items-center gap-2";
+                investorBtn.className = "inquiry-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-agri-300 hover:text-white flex items-center gap-2";
+                
+                badge.innerHTML = `<i data-lucide="calendar" class="w-5 h-5 text-agri-400"></i><span>Booking Request: <strong class="text-white">Commercial Demo & Laser Field Trial Evaluation</strong></span>`;
+                orgLabel.textContent = "Organization / Farm Name";
+                selectorLabel.textContent = "Approximate Acreage";
+                selectorDropdown.innerHTML = `
+                    <option value="small">50 - 500 Acres</option>
+                    <option value="medium">500 - 2,500 Acres</option>
+                    <option value="large">2,500+ Acres</option>
+                    <option value="partner">Research / Strategic Partner</option>
+                `;
+                submitBtn.innerHTML = `<span>Submit Demo & Field Request</span> <i data-lucide="send" class="w-4 h-4"></i>`;
+            } else {
+                investorBtn.className = "inquiry-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all bg-agri-500 text-white shadow-md glow-emerald flex items-center gap-2";
+                clientBtn.className = "inquiry-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-agri-300 hover:text-white flex items-center gap-2";
+                
+                badge.innerHTML = `<i data-lucide="trending-up" class="w-5 h-5 text-cyanGlow"></i><span>Investor Relations: <strong class="text-white">Seed Funding & Pitch Deck Discussion</strong></span>`;
+                orgLabel.textContent = "Fund / Venture Firm Name";
+                selectorLabel.textContent = "Ticket Size / Investment Focus";
+                selectorDropdown.innerHTML = `
+                    <option value="angel">Angel Investor / Syndicate</option>
+                    <option value="seed">Seed Fund (AgriTech / DeepTech)</option>
+                    <option value="vc">Institutional Venture Capital</option>
+                    <option value="strategic">Strategic Industry Partner</option>
+                `;
+                submitBtn.innerHTML = `<span>Schedule Investor Discussion</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>`;
+            }
+            lucide.createIcons();
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-3 px-6 py-4 rounded-2xl glass-card border ${type === 'success' ? 'border-agri-400 text-white bg-agri-900/90' : 'border-red-500 text-white bg-red-950/90'} shadow-2xl transition-all transform translate-y-2 opacity-0`;
+            
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle2' : 'alert-circle'}" class="w-5 h-5 text-agri-400 shrink-0"></i>
+                <span class="text-sm font-medium">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
+        // Form submission handler
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const btn = document.getElementById('submit-btn');
+            
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Submitting Request...`;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                if (currentInquiryMode === 'client') {
+                    showToast(`Thank you, ${name}! Your laser field demo request has been received. Our team will contact you shortly.`);
+                } else {
+                    showToast(`Thank you, ${name}! Your investor meeting request has been logged. Our leadership team will reach out with the pitch deck.`);
+                }
+                document.getElementById('inquiry-form').reset();
+                btn.disabled = false;
+                switchInquiryType(currentInquiryMode);
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
